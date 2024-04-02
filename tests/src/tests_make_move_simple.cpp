@@ -120,7 +120,7 @@ TEST_F(make_move_simple_TestSuite, make_move_promote) {
     INFO("Make move cause promotion of white piece to queen");
     ChessGame game;
     initialize_game_soln(&game);
-    fen_to_chessboard("8/7P/8/8/8/8/8/8 w - - 0 1", &game);
+    fen_to_chessboard("8/7P/8/8/8/8/8/8 w", &game);
     
     ChessMove move;
     parse_move("h7h8q", &move);
