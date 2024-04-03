@@ -261,37 +261,41 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
-    // Check the length of the move string
+   // Validate the length of the move string
     size_t len = strlen(move);
-    if (len < 4 || len > 5) {
+    if (len != 4 && len != 5) {
         return PARSE_MOVE_INVALID_FORMAT;
     }
 
-    // Check if row letters are within 'a' to 'h' and row numbers within '1' to '8'
-    if (move[0] < 'a' || move[0] > 'h' || move[2] < 'a' || move[2] > 'h' ||
-        move[1] < '1' || move[1] > '8' || move[3] < '1' || move[3] > '8') {
+    // Validate characters are within 'a' to 'h' for columns and '1' to '8' for rows
+    if (!(move[0] >= 'a' && move[0] <= 'h' && move[1] >= '1' && move[1] <= '8' &&
+          move[2] >= 'a' && move[2] <= 'h' && move[3] >= '1' && move[3] <= '8')) {
         return PARSE_MOVE_INVALID_FORMAT;
     }
 
-    // Parse the source and destination squares
-    strncpy(parsed_move->startSquare, move, 2);
-    parsed_move->startSquare[2] = '\0'; // Null-terminate the string
-    
-    // For moves without promotion, copy directly; handle promotion separately
-    if (len == 4) {
-        strncpy(parsed_move->endSquare, move + 2, 2); // Copy the next two characters for the end square
-        parsed_move->endSquare[2] = '\0'; // Null-terminate the string
-    } else if (len == 5) { // Handle promotion
-        strncpy(parsed_move->endSquare, move + 2, 2); // Copy the destination square
-        char promotionPiece = tolower(move[4]); // Convert to lowercase to simplify comparison
-        if (promotionPiece != 'q' && promotionPiece != 'r' && promotionPiece != 'b' && promotionPiece != 'n') {
-            return PARSE_MOVE_INVALID_PROMOTION; // Invalid promotion piece
+    // For pawn promotion, check the promotion character and destination row
+    if (len == 5) {
+        if (!(move[4] == 'q' || move[4] == 'r' || move[4] == 'b' || move[4] == 'n')) {
+            return PARSE_MOVE_INVALID_PROMOTION;
         }
-        parsed_move->endSquare[2] = promotionPiece; // Append the promotion piece to endSquare
-        parsed_move->endSquare[3] = '\0'; // Null-terminate the string
+        if (!((move[1] == '7' && move[3] == '8' && move[4] != '\0') || (move[1] == '2' && move[3] == '1' && move[4] != '\0'))) {
+            return PARSE_MOVE_INVALID_DESTINATION;
+        }
     }
 
-    return 0; // Successful parsing
+    // Fill the ChessMove struct
+    strncpy(parsed_move->startSquare, move, 2);
+    parsed_move->startSquare[2] = '\0'; // Ensure null termination
+
+    strncpy(parsed_move->endSquare, move + 2, 2);
+    if (len == 5) { // Append the promotion piece if applicable
+        parsed_move->endSquare[2] = tolower(move[4]);
+        parsed_move->endSquare[3] = '\0'; // Ensure null termination
+    } else {
+        parsed_move->endSquare[2] = '\0'; // Ensure null termination for non-promotion moves
+    }
+
+    return 0; // Indicate successful parsing
     
     (void)move;
     (void)parsed_move;
