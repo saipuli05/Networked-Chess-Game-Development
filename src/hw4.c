@@ -28,6 +28,40 @@ void initialize_game(ChessGame *game) {
 }
 
 void chessboard_to_fen(char fen[], ChessGame *game) {
+     int index = 0; // Index for appending characters to fen string
+
+    for (int row = 0; row < 8; row++) {
+        int emptyCount = 0; // Count consecutive empty squares
+
+        for (int col = 0; col < 8; col++) {
+            char piece = game->chessboard[row][col];
+
+            if (piece == '.') { // Empty square
+                emptyCount++;
+            } else {
+                if (emptyCount > 0) {
+                    // Append count of empty squares before the piece
+                    fen[index++] = '0' + emptyCount;
+                    emptyCount = 0;
+                }
+                fen[index++] = piece;
+            }
+        }
+
+        if (emptyCount > 0) {
+            // Append count of empty squares at the end of the row
+            fen[index++] = '0' + emptyCount;
+        }
+
+        if (row < 7) {
+            fen[index++] = '/'; // Separate rows
+        }
+    }
+
+    // Append space and the current player's turn
+    fen[index++] = ' ';
+    fen[index++] = (game->currentPlayer == WHITE_PLAYER) ? 'w' : 'b';
+    fen[index] = '\0'; // Null-terminate the string
     (void)fen;
     (void)game;
 }
@@ -256,6 +290,30 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
 }
 
 void fen_to_chessboard(const char *fen, ChessGame *game) {
+     int row = 0, col = 0;
+
+    while (*fen != ' ') { // Parse until space (end of board state)
+        if (*fen == '/') {
+            row++; // Move to the next row
+            col = 0; // Reset column to the start
+        } else if (isdigit(*fen)) {
+            int emptySpaces = *fen - '0';
+            for (int i = 0; i < emptySpaces; i++) {
+                game->chessboard[row][col++] = '.'; // Mark empty squares
+            }
+        } else {
+            game->chessboard[row][col++] = *fen; // Place the piece on the board
+        }
+        fen++; // Move to the next character
+    }
+
+    fen++; // Skip the space
+    game->currentPlayer = (*fen == 'w') ? WHITE_PLAYER : BLACK_PLAYER; // Set the current player based on FEN
+
+    // Reset other game state if necessary (e.g., move counters)
+    game->moveCount = 0;
+    game->capturedCount = 0;
+    
     (void)fen;
     (void)game;
 }
