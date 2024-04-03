@@ -1,6 +1,29 @@
 #include "hw4.h"
 
 void initialize_game(ChessGame *game) {
+    const char *startingBoard[8] = {
+        "rnbqkbnr",
+        "pppppppp",
+        "........",
+        "........",
+        "........",
+        "........",
+        "PPPPPPPP",
+        "RNBQKBNR"
+    };
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            game->chessboard[i][j] = startingBoard[i][j];
+        }
+    }
+
+    // Initialize counts
+    game->moveCount = 0;
+    game->capturedCount = 0;
+
+    // Set the current player to WHITE_PLAYER at the start of the game
+    game->currentPlayer = WHITE_PLAYER;
     (void)game;
 }
 
