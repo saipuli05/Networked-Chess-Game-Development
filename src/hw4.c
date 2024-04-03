@@ -445,18 +445,62 @@ int receive_command(ChessGame *game, const char *message, int socketfd, bool is_
 }
 
 int save_game(ChessGame *game, const char *username, const char *db_filename) {
+     FILE *file = fopen(db_filename, "a"); // Open file in append mode
+    if (!file) {
+        perror("Failed to open file");
+        return -1; // Error opening file
+    }
+
+    char fen[100]; // Buffer for FEN string; adjust size as needed
+    chessboard_to_fen(fen, game); // Generate FEN string from current game state
+
+    // Write username and FEN string to file
+    if (fprintf(file, "%s:%s\n", username, fen) < 0) {
+        fclose(file); // Error writing to file, ensure file is closed
+        return -1;
+    }
+
+    fclose(file); // Close the file
+    return 0; // Success
+    
     (void)game;
     (void)username;
     (void)db_filename;
-    return -999;
+    
 }
 
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
+    FILE *file = fopen(db_filename, "r"); // Open file in read mode
+    if (!file) {
+        perror("Failed to open file");
+        return -1; // Error opening file
+    }
+
+    char line[150]; // Buffer for each line in the file; adjust size as needed
+    int current_save = 0;
+    while (fgets(line, sizeof(line), file)) {
+        char *found_username = strtok(line, ":");
+        if (found_username && strcmp(found_username, username) == 0) {
+            current_save++;
+            if (current_save == save_number) {
+                char *fen = strtok(NULL, "\n");
+                if (fen) {
+                    fen_to_chessboard(fen, game); // Load the FEN string into the game
+                    fclose(file);
+                    return 0; // Success
+                }
+            }
+        }
+    }
+
+    fclose(file); // Close the file
+    return -1; // Save not found or error occurred
+    
     (void)game;
     (void)username;
     (void)db_filename;
     (void)save_number;
-    return -999;
+    
 }
 
 void display_chessboard(ChessGame *game) {
