@@ -308,11 +308,66 @@ int parse_move(const char *move, ChessMove *parsed_move) {
 }
 
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
+    // Convert chessboard positions to 0-based array indices
+    int startRow = 8 - (move->startSquare[1] - '0');
+    int startCol = move->startSquare[0] - 'a';
+    int endRow = 8 - (move->endSquare[1] - '0');
+    int endCol = move->endSquare[0] - 'a';
+    char piece = game->chessboard[startRow][startCol];
+
+    // Validate move if required
+    if (validate_move) {
+        // Check if it's the correct player's turn
+        if ((is_client && game->currentPlayer != WHITE_PLAYER) ||
+            (!is_client && game->currentPlayer != BLACK_PLAYER)) {
+            return MOVE_OUT_OF_TURN;
+        }
+
+        // Check if the start square is empty
+        if (piece == '.') {
+            return MOVE_NOTHING;
+        }
+
+        // Check if moving the correct color piece
+        bool isWhitePiece = piece >= 'A' && piece <= 'Z';
+        if ((is_client && !isWhitePiece) || (!is_client && isWhitePiece)) {
+            return MOVE_WRONG_COLOR;
+        }
+
+        // Verify the move is valid for the piece
+        if (!is_valid_move(piece, startRow, startCol, endRow, endCol, game)) {
+            return MOVE_WRONG;
+        }
+
+        // Additional checks for pawn promotion, capturing own pieces, etc., could be added here
+    }
+
+    // Execute the move
+    // Update the chessboard
+    game->chessboard[endRow][endCol] = game->chessboard[startRow][startCol];
+    game->chessboard[startRow][startCol] = '.';
+
+    // Update the moves and capturedPieces arrays, moveCount, and capturedCount as necessary
+    strncpy(game->moves[game->moveCount].startSquare, move->startSquare, 2);
+    strncpy(game->moves[game->moveCount].endSquare, move->endSquare, 3);
+    game->moveCount++;
+
+    // Handle capturing
+    char capturedPiece = game->chessboard[endRow][endCol];
+    if (capturedPiece != '.') {
+        game->capturedPieces[game->capturedCount++] = capturedPiece;
+    }
+
+    // Update currentPlayer to switch turns
+    game->currentPlayer = (game->currentPlayer == WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
+
+    return 0; // Move successful
+    
     (void)game;
     (void)move;
     (void)is_client;
     (void)validate_move;
-    return -999;
+    
 }
 
 int send_command(ChessGame *game, const char *message, int socketfd, bool is_client) {
