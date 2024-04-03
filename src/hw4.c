@@ -261,9 +261,40 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
 }
 
 int parse_move(const char *move, ChessMove *parsed_move) {
+    // Check the length of the move string
+    size_t len = strlen(move);
+    if (len < 4 || len > 5) {
+        return PARSE_MOVE_INVALID_FORMAT;
+    }
+
+    // Check if row letters are within 'a' to 'h' and row numbers within '1' to '8'
+    if (move[0] < 'a' || move[0] > 'h' || move[2] < 'a' || move[2] > 'h' ||
+        move[1] < '1' || move[1] > '8' || move[3] < '1' || move[3] > '8') {
+        return PARSE_MOVE_INVALID_FORMAT;
+    }
+
+    // Parse the source and destination squares
+    strncpy(parsed_move->startSquare, move, 2);
+    parsed_move->startSquare[2] = '\0'; // Null-terminate the string
+    
+    // For moves without promotion, copy directly; handle promotion separately
+    if (len == 4) {
+        strncpy(parsed_move->endSquare, move + 2, 2); // Copy the next two characters for the end square
+        parsed_move->endSquare[2] = '\0'; // Null-terminate the string
+    } else if (len == 5) { // Handle promotion
+        strncpy(parsed_move->endSquare, move + 2, 2); // Copy the destination square
+        char promotionPiece = tolower(move[4]); // Convert to lowercase to simplify comparison
+        if (promotionPiece != 'q' && promotionPiece != 'r' && promotionPiece != 'b' && promotionPiece != 'n') {
+            return PARSE_MOVE_INVALID_PROMOTION; // Invalid promotion piece
+        }
+        parsed_move->endSquare[2] = promotionPiece; // Append the promotion piece to endSquare
+        parsed_move->endSquare[3] = '\0'; // Null-terminate the string
+    }
+
+    return 0; // Successful parsing
+    
     (void)move;
     (void)parsed_move;
-    return -999;
 }
 
 int make_move(ChessGame *game, ChessMove *move, bool is_client, bool validate_move) {
