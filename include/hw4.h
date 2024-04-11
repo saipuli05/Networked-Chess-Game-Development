@@ -79,4 +79,11 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
 
 void display_chessboard(ChessGame *game);
 
+
+// Helper functions
+int is_valid_column(char c);
+int is_valid_row(char c);
+bool is_valid_format(const char *move);
+char **split_string(const char *string, char i);
+
 #endif

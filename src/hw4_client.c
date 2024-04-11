@@ -35,9 +35,42 @@ int main() {
     initialize_game(&game);
     display_chessboard(&game);
 
+	char buffer[BUFFER_SIZE] = {0};
+	char command[BUFFER_SIZE] = {0};
+
     while (1) {
-        // Fill this in
-    }
+
+		printf("Enter command: ");
+		fgets(command, BUFFER_SIZE, stdin); // Reads the command from the standard input
+		command[strcspn(command, "\n")] = 0; // Removes the newline character from the input
+
+		int send_status = send_command(&game, command, connfd, true);
+		if (send_status == COMMAND_ERROR || send_status == COMMAND_UNKNOWN) {
+			printf("Invalid command. Please try again.\n");
+			continue;
+		} else if (send_status == COMMAND_FORFEIT) {
+			break; // Exit the loop if the command is to forfeit
+		} else if (send_status == COMMAND_SAVE){
+			printf("Game saved. \n");
+			continue; // Skip the next part of the loop if the command is to save
+		}
+
+		display_chessboard(&game); // Optionally display the chessboard after each command
+
+		ssize_t bytes_received = read(connfd, buffer, BUFFER_SIZE - 1);
+		if (bytes_received <= 0) {
+			printf("Server closed the connection or error in receiving data.\n");
+			break;
+		}
+		buffer[bytes_received] = '\0';
+
+		if (receive_command(&game, buffer, connfd, true) == COMMAND_FORFEIT) {
+			printf("Game over. The server has forfeited.\n");
+			break; // Exit the loop if the server forfeits
+		}
+
+		display_chessboard(&game); // Optionally display the chessboard after each command
+	}
 
     // Please ensure that the following lines of code execute just before your program terminates.
     // If necessary, copy and paste it to other parts of your code where you terminate your program.
