@@ -1,5 +1,15 @@
 #include "hw4.h"
 
+// Helper functions
+int is_valid_column(char c);
+
+int is_valid_row(char c);
+
+bool is_valid_format(const char *move);
+
+char **split_string(const char *string, char i);
+
+
 void initialize_game(ChessGame *game) {
 	const char *startingBoard[8] = {
 			"rnbqkbnr",
@@ -111,12 +121,6 @@ bool is_valid_pawn_move(char piece, int src_row, int src_col, int dest_row, int 
 		}
 	}
 
-	(void) piece;
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
-	(void) game;
 	return false;
 }
 
@@ -153,11 +157,6 @@ bool is_valid_knight_move(int src_row, int src_col, int dest_row, int dest_col) 
 
 	// Check for L-shape move: 2 squares one axis and 1 square the other axis
 	return (row_diff == 2 && col_diff == 1) || (row_diff == 1 && col_diff == 2);
-
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
 }
 
 bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
@@ -186,12 +185,6 @@ bool is_valid_bishop_move(int src_row, int src_col, int dest_row, int dest_col, 
 
 	// The path is clear, move is valid
 	return true;
-
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
-	(void) game;
 }
 
 bool is_clear_path(int src_row, int src_col, int dest_row, int dest_col, ChessGame *game) {
@@ -226,11 +219,6 @@ bool is_valid_queen_move(int src_row, int src_col, int dest_row, int dest_col, C
 	// If not horizontal, vertical, or diagonal, it's not a valid move
 	return false;
 
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
-	(void) game;
 }
 
 bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col) {
@@ -245,11 +233,6 @@ bool is_valid_king_move(int src_row, int src_col, int dest_row, int dest_col) {
 	} else {
 		return false;
 	}
-
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
 
 }
 
@@ -284,13 +267,6 @@ bool is_valid_move(char piece, int src_row, int src_col, int dest_row, int dest_
 
 	return result;
 
-	(void) piece;
-	(void) src_row;
-	(void) src_col;
-	(void) dest_row;
-	(void) dest_col;
-	(void) game;
-
 }
 
 void fen_to_chessboard(const char *fen, ChessGame *game) {
@@ -318,8 +294,6 @@ void fen_to_chessboard(const char *fen, ChessGame *game) {
 	game->moveCount = 0;
 	game->capturedCount = 0;
 
-	(void) fen;
-	(void) game;
 }
 
 // Helper function to check if a character is within 'a' to 'h'
@@ -380,9 +354,6 @@ int parse_move(const char *move, ChessMove *parsed_move) {
 	}
 
 	return 0; // Indicate successful parsing
-
-	(void) move;
-	(void) parsed_move;
 }
 
 
@@ -651,11 +622,6 @@ int save_game(ChessGame *game, const char *username, const char *db_filename) {
 
 	fclose(file); // Close the file
 	return 0; // Success
-
-	(void) game;
-	(void) username;
-	(void) db_filename;
-
 }
 
 int load_game(ChessGame *game, const char *username, const char *db_filename, int save_number) {
@@ -684,11 +650,6 @@ int load_game(ChessGame *game, const char *username, const char *db_filename, in
 
 	fclose(file); // Close the file
 	return -1; // Save not found or error occurred
-
-	(void) game;
-	(void) username;
-	(void) db_filename;
-	(void) save_number;
 
 }
 
