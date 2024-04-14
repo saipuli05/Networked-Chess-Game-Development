@@ -58,7 +58,6 @@ typedef struct {
     char chessboard[8][8];
 } ChessGame;
 
-// Required functions
 void initialize_game(ChessGame *game);
 void chessboard_to_fen(char fen[], ChessGame *game);
 void fen_to_chessboard(const char *fen, ChessGame *game);

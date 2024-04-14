@@ -14,7 +14,7 @@ int main() {
     int connfd = 0;
     struct sockaddr_in serv_addr;
 
-    // Connect to the server
+    
     if ((connfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket failed");
         exit(EXIT_FAILURE);
@@ -41,21 +41,20 @@ int main() {
     while (1) {
 
 		printf("Enter command: ");
-		fgets(command, BUFFER_SIZE, stdin); // Reads the command from the standard input
-		command[strcspn(command, "\n")] = 0; // Removes the newline character from the input
-
+		fgets(command, BUFFER_SIZE, stdin); 
+		command[strcspn(command, "\n")] = 0; 
 		int send_status = send_command(&game, command, connfd, true);
 		if (send_status == COMMAND_ERROR || send_status == COMMAND_UNKNOWN) {
 			printf("Invalid command. Please try again.\n");
 			continue;
 		} else if (send_status == COMMAND_FORFEIT) {
-			break; // Exit the loop if the command is to forfeit
+			break; 
 		} else if (send_status == COMMAND_SAVE){
 			printf("Game saved. \n");
-			continue; // Skip the next part of the loop if the command is to save
+			continue; 
 		}
 
-		display_chessboard(&game); // Optionally display the chessboard after each command
+		display_chessboard(&game); 
 
 		ssize_t bytes_received = read(connfd, buffer, BUFFER_SIZE - 1);
 		if (bytes_received <= 0) {
@@ -66,14 +65,13 @@ int main() {
 
 		if (receive_command(&game, buffer, connfd, true) == COMMAND_FORFEIT) {
 			printf("Game over. The server has forfeited.\n");
-			break; // Exit the loop if the server forfeits
+			break; 
 		}
 
-		display_chessboard(&game); // Optionally display the chessboard after each command
+		display_chessboard(&game); 
 	}
 
-    // Please ensure that the following lines of code execute just before your program terminates.
-    // If necessary, copy and paste it to other parts of your code where you terminate your program.
+    
     FILE *temp = fopen("./fen.txt", "w");
     char fen[200];
     chessboard_to_fen(fen, &game);
